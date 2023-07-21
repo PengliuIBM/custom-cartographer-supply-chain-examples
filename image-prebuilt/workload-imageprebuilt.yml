@@ -1,0 +1,19 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  name: image-prebuilt
+  namespace: default
+  labels:
+    app.kubernetes.io/part-of: image-prebuilt
+    workload-intent: image-prebuilt
+spec:
+  serviceAccountName: #@ data.values.service_account_name
+  params:
+    - name: registry_server
+      value: harbor-repo.vmware.com
+    - name: registry_repository
+      value: tapsme/cartographer
+  source:
+    image: harbor-repo.vmware.com/tapsme/special-spring-boot-app:0.0.2

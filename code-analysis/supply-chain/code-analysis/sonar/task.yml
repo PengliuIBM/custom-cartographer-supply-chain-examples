@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  labels:
+    task: code-analysis
+  name: sonar
+  namespace: default
+spec:
+  params:
+  - name: source-url
+  - name: source-revision
+  steps:
+  - image: harbor-repo.vmware.com/dockerhub-proxy-cache/library/gradle
+    name: code-analysis
+    resources: {}
+    script: |-
+      cd `mktemp -d`
+
+      wget -qO- $(params.source-url) | tar xvz
+      chmod +x mvnw
+      ./mvnw verify sonar:sonar

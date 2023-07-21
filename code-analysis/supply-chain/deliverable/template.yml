@@ -1,0 +1,40 @@
+#@ load("@ytt:data", "data")
+
+apiVersion: carto.run/v1alpha1
+kind: ClusterTemplate
+metadata:
+  name: deliverable-template
+spec:
+  params:
+    - name: gitops_server
+      default: ""
+    - name: gitops_repository
+      default: ""
+    - name: gitops_branch
+      default: "main"
+
+  ytt: |
+    #@ load("@ytt:data", "data")
+
+    #@ def giturl():
+    #@   return "ssh://git@" + "/".join([
+    #@    data.values.params.gitops_server,
+    #@    data.values.params.gitops_repository
+    #@    ])
+    #@ end
+    
+    apiVersion: carto.run/v1alpha1
+    kind: Deliverable
+    metadata:
+      name: #@ data.values.workload.metadata.name
+      labels:
+        workload-type: deliver
+        workload-intent: code-analysis
+    spec:
+      serviceAccountName: #@ data.values.workload.spec.serviceAccountName
+      source:
+        git:
+          url: #@ giturl()
+          ref:
+            branch: #@ data.values.params.gitops_branch
+            commit: #@ data.values.source.revision
